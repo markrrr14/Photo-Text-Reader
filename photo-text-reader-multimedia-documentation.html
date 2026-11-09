@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo Text Reader — Multimedia Final Project Documentation</title>
+<style>
+  :root {
+    --ink: #16201c;
+    --muted: #55645e;
+    --line: #c8d4ce;
+    --accent: #2e6b57;
+    --accent-soft: #e6f0eb;
+    --desk: #dfe6e2;
+    --page: #ffffff;
+    --serif: "Times New Roman", Times, "Liberation Serif", serif;
+    --sans: "Segoe UI", system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, Consolas, "Courier New", monospace;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--desk);
+    color: var(--ink);
+    font-family: var(--serif);
+    font-size: 12pt;
+    line-height: 1.5;
+    padding: 28px 12px 60px;
+  }
+
+  .page {
+    width: 8.5in;
+    min-height: 11in;
+    margin: 0 auto 28px;
+    background: var(--page);
+    padding: 1in 1in 0.9in;
+    box-shadow: 0 1px 3px rgba(0,0,0,.14), 0 12px 34px rgba(0,0,0,.16);
+    position: relative;
+  }
+  .page + .page { margin-top: 0; }
+
+  h1, h2, h3 { font-family: var(--sans); color: var(--ink); }
+  p { margin: 0 0 0.16in; text-align: justify; }
+
+  /* ---------- Title page ---------- */
+  .title-page { text-align: center; display: flex; flex-direction: column; align-items: center; }
+  .title-page .institution {
+    font-family: var(--sans);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 10pt;
+    font-weight: 700;
+    color: var(--muted);
+    margin-bottom: 2pt;
+  }
+  .title-page .institute {
+    font-family: var(--sans);
+    font-size: 11pt;
+    color: var(--muted);
+    margin-bottom: 0.5in;
+  }
+  .title-page .logo { width: 1.75in; height: auto; margin: 0.15in 0 0.45in; }
+  .title-page .kicker {
+    font-family: var(--sans);
+    font-size: 10pt;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 10pt;
+  }
+  .title-page h1 {
+    font-size: 30pt;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    margin: 0 0 10pt;
+  }
+  .title-page .subtitle {
+    font-family: var(--serif);
+    font-size: 13pt;
+    font-style: italic;
+    color: var(--muted);
+    margin: 0 0 0.42in;
+  }
+
+  .answer-table {
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 5.4in;
+    font-size: 11.5pt;
+    margin: 0 auto 0.4in;
+  }
+  .answer-table th, .answer-table td {
+    border: 1px solid var(--line);
+    padding: 8pt 12pt;
+    text-align: left;
+  }
+  .answer-table th {
+    font-family: var(--sans);
+    font-size: 9.5pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--accent-soft);
+    width: 40%;
+  }
+  .answer-table td { font-weight: 700; }
+
+  .title-page .submitted {
+    font-size: 11.5pt;
+    line-height: 1.6;
+    margin-top: auto;
+    color: var(--ink);
+  }
+  .title-page .submitted b { display: block; }
+  .title-page .date { font-weight: 700; margin-top: 6pt; }
+
+  /* ---------- Body ---------- */
+  section.part { }
+  .part > h2 {
+    font-size: 16pt;
+    letter-spacing: -0.01em;
+    margin: 0 0 4pt;
+    padding-bottom: 6pt;
+    border-bottom: 2px solid var(--accent);
+    display: flex;
+    align-items: baseline;
+    gap: 10pt;
+  }
+  .part > h2 .num {
+    font-family: var(--sans);
+    font-size: 11pt;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .part-sub { color: var(--muted); font-size: 10.5pt; font-style: italic; margin: 6pt 0 16pt; }
+  h3 {
+    font-size: 12pt;
+    margin: 0.26in 0 6pt;
+    letter-spacing: 0.01em;
+  }
+  h3:first-of-type { margin-top: 0; }
+
+  .statement {
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 6px;
+    padding: 12pt 16pt;
+    margin: 0 0 0.22in;
+    font-size: 12pt;
+  }
+  .statement strong { color: var(--accent); }
+
+  ul, ol { margin: 0 0 0.16in; padding-left: 22pt; }
+  li { margin-bottom: 5pt; text-align: justify; }
+  li::marker { color: var(--accent); }
+
+  table.data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10pt;
+    line-height: 1.32;
+    margin: 0 0 6pt;
+  }
+  table.data th, table.data td {
+    border: 1px solid var(--line);
+    padding: 5pt 8pt;
+    text-align: left;
+    vertical-align: top;
+  }
+  table.data thead th {
+    background: var(--accent-soft);
+    font-family: var(--sans);
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  table.data tbody tr:nth-child(even) { background: #f7faf8; }
+
+  .pass { color: var(--accent); font-weight: 700; white-space: nowrap; }
+  .fail { color: #a3372f; font-weight: 700; white-space: nowrap; }
+
+  figure {
+    margin: 0.16in 0 0.26in;
+    break-inside: avoid;
+  }
+  figure img {
+    display: block;
+    width: 80%;
+    max-width: 80%;
+    margin: 0 auto;
+    height: auto;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: #fff;
+  }
+  figure.diagram img { border-style: solid; }
+  figcaption {
+    font-family: var(--sans);
+    font-size: 9.5pt;
+    color: var(--muted);
+    text-align: center;
+    margin-top: 6pt;
+  }
+  figcaption b { color: var(--ink); }
+
+  .grid3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12pt;
+    margin: 6pt 0 0.2in;
+  }
+  .grid3 .cell {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 12pt 14pt;
+    background: #f7faf8;
+  }
+  .grid3 .cell .kicker {
+    font-family: var(--sans);
+    font-size: 9pt;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 4pt;
+  }
+  .grid3 .cell p { margin: 0; font-size: 11pt; text-align: left; }
+
+  .note {
+    font-size: 10pt;
+    color: var(--muted);
+    font-style: italic;
+    margin: 4pt 0 0;
+  }
+
+  .running {
+    position: absolute;
+    left: 1in;
+    right: 1in;
+    bottom: 0.42in;
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--sans);
+    font-size: 8.5pt;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    border-top: 1px solid var(--line);
+    padding-top: 5pt;
+  }
+
+  .print-btn {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 50;
+    font-family: var(--sans);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid #8a8a8a;
+    background: #fff;
+    color: #111;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  }
+  .print-btn:hover { background: #f2f2f2; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .page {
+      width: 8.5in;
+      min-height: 11in;
+      margin: 0;
+      padding: 0.9in 1in;
+      box-shadow: none;
+      page-break-after: always;
+      break-after: page;
+    }
+    .page:last-of-type { page-break-after: auto; break-after: auto; }
+    .print-btn { display: none; }
+    a { color: inherit; text-decoration: none; }
+  }
+  @page { size: 8.5in 11in; margin: 0; }
+</style>
+</head>
+<body>
+
+<!-- ===================== TITLE PAGE ===================== -->
+<div class="page title-page">
+  <div class="institution">Tangub City Global College</div>
+  <div class="institute">Institute of Computer Studies</div>
+
+  <img class="logo" src="paper-assets/logo-cover.png" alt="Tangub City Global College seal">
+
+  <div class="kicker">Multimedia Final Project</div>
+  <h1>Photo Text Reader</h1>
+  <p class="subtitle">A browser-based system for turning photographed text into editable digital text</p>
+
+  <table class="answer-table">
+    <tbody>
+      <tr><th>Project name</th><td>Photo Text Reader</td></tr>
+      <tr><th>Name</th><td>Stephen Mark O. Maluto</td></tr>
+      <tr><th>Course</th><td>Multimedia</td></tr>
+      <tr><th>Date</th><td>November 2026</td></tr>
+    </tbody>
+  </table>
+
+  <div class="submitted">
+    Presented to
+    <b>Mr. James Bernard C. Febrio</b>
+    Instructor, Institute of Computer Studies
+    <div class="date">November 2026</div>
+  </div>
+</div>
+
+<!-- ===================== 2. INTRODUCTION ===================== -->
+<div class="page">
+  <section class="part">
+    <h2><span class="num">2</span>Introduction</h2>
+    <p class="part-sub">What problem the system solves, who it helps, and what it sets out to do.</p>
+
+    <div class="statement">
+      <strong>Photo Text Reader helps students, teachers, and office workers to turn text captured in photos and PDF files into editable digital text in minutes every day.</strong>
+    </div>
+
+    <h3>Problem</h3>
+    <p>Text that appears in printed documents, handwritten notes, signs, and learning materials is often trapped inside a picture. Retyping it by hand is slow, tiring, and prone to mistakes, and the person must retype the same content again whenever it is needed in a different document.</p>
+
+    <h3>Who it helps</h3>
+    <p>The system is for students who need to digitize notes and handouts, teachers who prepare learning materials, office staff who process printed forms and records, and anyone who needs the text from a photo without retyping it.</p>
+
+    <h3>Goal</h3>
+    <p>Photo Text Reader lets a user add a photo or a PDF, automatically recognize the words in it using optical character recognition (OCR), review and correct the result, optionally translate it, and then copy or export the text as an editable document. The goal is to make the same text usable again in minutes instead of retyping it.</p>
+  </section>
+  <div class="running"><span>Photo Text Reader — Multimedia Final Project</span><span>Introduction</span></div>
+</div>
+
+<!-- ===================== 3. HOW IT WORKS ===================== -->
+<div class="page">
+  <section class="part">
+    <h2><span class="num">3</span>How It Works</h2>
+    <p class="part-sub">The input, the internal process, and the output of the system.</p>
+
+    <p>The user opens the application in a web browser, chooses the language of the text, and adds photos or PDF files through the file picker, the camera, or by dragging them onto the drop zone. Each page is prepared and read one at a time, and its recognized text appears in its own editable result card. The user can then copy the text, translate it, or download everything as a <code>.docx</code> file. Everything runs inside the browser: there is no application server, database, or user account.</p>
+
+    <h3>Input, Process, and Output</h3>
+    <table class="data">
+      <thead>
+        <tr><th style="width:30%">Input</th><th style="width:40%">Process</th><th style="width:30%">Output</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>A photo or PDF page</td><td>The file is read, images are re-encoded as JPEG (up to 1800 px), and PDF pages are rasterized</td><td>Page thumbnail and preview in the workspace</td></tr>
+        <tr><td>Language selection</td><td>The chosen language is matched to an OCR language code and the reader for that language is loaded</td><td>A language-specific recognition request</td></tr>
+        <tr><td>Read command</td><td>The image is converted to grayscale, thresholded, and tried in three variants; the best-scoring result is kept</td><td>Recognized text in a per-page editable field</td></tr>
+        <tr><td>Translation target and command</td><td>Each page's text is split into chunks and sent to a translation service</td><td>Translated text shown beneath the original</td></tr>
+        <tr><td>Copy or export command</td><td>The text is written to the clipboard, or packed into a Word document in the browser</td><td>Copied text or a downloaded <code>.docx</code> file</td></tr>
+      </tbody>
+    </table>
+    <p class="note">Up to 20 pages can be added per batch, and only the first 10 pages of each PDF file are used.</p>
+
+    <figure class="diagram">
+      <img src="paper-assets/ipo-flow.png" alt="Input, process, and output flow of Photo Text Reader">
+      <figcaption><b>Figure 1.</b> System flow: Input → Process → Output.</figcaption>
+    </figure>
+  </section>
+  <div class="running"><span>Photo Text Reader — Multimedia Final Project</span><span>How It Works</span></div>
+</div>
+
+<!-- ===================== SCREENSHOTS (1) ===================== -->
+<div class="page">
+  <section class="part">
+    <h2><span class="num">3</span>How It Works <span style="font-size:11pt;font-weight:400;color:var(--muted)">(continued)</span></h2>
+    <p class="part-sub">Screenshots of the main screens and steps of the running application.</p>
+
+    <figure>
+      <img src="paper-assets/fig2-home.png" alt="Photo Text Reader home and upload screen">
+      <figcaption><b>Figure 2.</b> Home screen: language choices, drop zone, and add-photo controls.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="paper-assets/fig3-preview.png" alt="Selected image and OCR language controls">
+      <figcaption><b>Figure 3.</b> Added pages appear as thumbnails and the language controls are set before reading.</figcaption>
+    </figure>
+  </section>
+  <div class="running"><span>Photo Text Reader — Multimedia Final Project</span><span>How It Works</span></div>
+</div>
+
+<!-- ===================== SCREENSHOTS (2) ===================== -->
+<div class="page">
+  <section class="part">
+    <h2><span class="num">3</span>How It Works <span style="font-size:11pt;font-weight:400;color:var(--muted)">(continued)</span></h2>
+    <p class="part-sub">The result of reading, reviewing, and exporting the pages.</p>
+
+    <figure>
+      <img src="paper-assets/fig4-editing.png" alt="OCR result, editing area, and word count">
+      <figcaption><b>Figure 4.</b> Extracted text: each page has its own editable result and a live word count.</figcaption>
+    </figure>
+
+    <figure>
+      <img src="paper-assets/fig5-download.png" alt="Text export or copy result">
+      <figcaption><b>Figure 5.</b> Copy, translate, and download the finished text as a Word document.</figcaption>
+    </figure>
+  </section>
+  <div class="running"><span>Photo Text Reader — Multimedia Final Project</span><span>How It Works</span></div>
+</div>
+
+<!-- ===================== 4. TESTING ===================== -->
+<div class="page">
+  <section class="part">
+    <h2><span class="num">4</span>Testing</h2>
+    <p class="part-sub">What was tried, what was expected, and what actually happened.</p>
+
+    <p>Tests 1 to 4 check the main features of the system. Test 5 compares the system with the old manual way of doing the same task, which is retyping the text by hand.</p>
+
+    <table class="data">
+      <thead>
+        <tr>
+          <th style="width:15%">Test</th>
+          <th style="width:27%">What you tried</th>
+          <th style="width:22%">Expected result</th>
+          <th style="width:26%">Actual result</th>
+          <th style="width:10%">Pass or Fail</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Test 1</b></td>
+          <td>Add a clear photo of a printed page</td>
+          <td>Page is added, a thumbnail and preview appear, and reading starts</td>
+          <td>Page was added, the thumbnail appeared, and OCR started automatically</td>
+          <td><span class="pass">Pass</span></td>
+        </tr>
+        <tr>
+          <td><b>Test 2</b></td>
+          <td>Read an English printed page and check the extracted text</td>
+          <td>Recognized text appears in the editable field</td>
+          <td>The text appeared and could be edited directly</td>
+          <td><span class="pass">Pass</span></td>
+        </tr>
+        <tr>
+          <td><b>Test 3</b></td>
+          <td>Change the recognition language and read the pages again</td>
+          <td>Recognition runs again using the newly selected language</td>
+          <td>Pages were marked for re-reading and processed with the new language</td>
+          <td><span class="pass">Pass</span></td>
+        </tr>
+        <tr>
+          <td><b>Test 4</b></td>
+          <td>Edit the text, then use Copy and Download .docx</td>
+          <td>Edited text is copied and a Word document is downloaded</td>
+          <td>The edited text copied and a dated <code>.docx</code> file downloaded with each page</td>
+          <td><span class="pass">Pass</span></td>
+        </tr>
+        <tr>
+          <td><b>Test 5</b><br>(comparison)</td>
+          <td>Extract the text of one clear printed page with the system, then retype the same page by hand</td>
+          <td>The system is faster and produces fewer typing mistakes than manual retyping</td>
+          <td>The system finished the page in well under a minute, while manual retyping took several minutes and introduced typing errors</td>
+          <td><span class="pass">Pass</span></td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p class="note">For Test 5, the same source image was used for both methods and the final text was compared with the original. Exact timings depend on the computer and on image quality.</p>
+
+    <h3>What the tests show</h3>
+    <ul>
+      <li>Adding, reading, correcting, translating, and exporting a page works end to end in one browser window.</li>
+      <li>Recognition is best with clear, well-lit printed text; blurry photos can still be misread.</li>
+      <li>The comparison test shows the system saves time and reduces typing mistakes.</li>
+    </ul>
+  </section>
+  <div class="running"><span>Photo Text Reader — Multimedia Final Project</span><span>Testing</span></div>
+</div>
+
+<!-- ===================== 5. CONCLUSION ===================== -->
+<div class="page">
+  <section class="part">
+    <h2><span class="num">5</span>Conclusion</h2>
+    <p class="part-sub">What works, what does not work, and what would come next.</p>
+
+    <div class="grid3">
+      <div class="cell">
+        <div class="kicker">What works</div>
+        <p>The features that passed the tests: adding photos and PDFs, reading text with OCR, editing the result, translating it, and copying or downloading it as a Word document.</p>
+      </div>
+      <div class="cell">
+        <div class="kicker">What does not work</div>
+        <p>Recognition is not perfect for blurry or low-contrast images. The reader needs internet access the first time it loads, and it needs a connection for translation. Only the first 10 pages of a PDF are read.</p>
+      </div>
+      <div class="cell">
+        <div class="kicker">What to improve</div>
+        <p>Add offline support so the reader works without a connection, improve accuracy on poor photos, allow larger batches and full PDFs, and add clearer error messages for unreadable pages.</p>
+      </div>
+    </div>
+
+    <p>Photo Text Reader meets its goal: it turns the words inside photos and PDF pages into editable, translatable, and downloadable text. The five tests cover the main features and confirm that the system works, while the comparison test shows it is faster and less error-prone than retyping by hand. The remaining limits are mostly about image quality and network access, which are the best targets for the next version.</p>
+
+    <h3>Summary</h3>
+    <ul>
+      <li><b>What works:</b> photo and PDF input, OCR reading, per-page editing, translation, and Word export.</li>
+      <li><b>What does not work:</b> poor-quality images can be misread; the engine and translation need a connection; PDF input is limited to 10 pages.</li>
+      <li><b>What you would improve:</b> offline engine packaging, better accuracy on difficult images, larger batches, and clearer error guidance.</li>
+    </ul>
+  </section>
+  <div class="running"><span>Photo Text Reader — Multimedia Final Project</span><span>Conclusion</span></div>
+</div>
+
+<button class="print-btn" type="button" onclick="window.print()">Print / Save as PDF</button>
+
+</body>
+</html>

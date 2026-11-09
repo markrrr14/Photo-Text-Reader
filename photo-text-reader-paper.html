@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo Text Reader - Project Paper</title>
+<style>
+  :root {
+    --page: #ffffff;
+    --ink: #000000;
+    --rule: #808080;
+    --desk: #d9d9d9;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--desk);
+    font-family: "Times New Roman", Times, "Liberation Serif", serif;
+    color: var(--ink);
+    font-size: 12pt;
+    line-height: 1.5;
+    padding: 28px 12px 60px;
+  }
+  .doc { display: grid; gap: 26px; }
+  .sheet {
+    position: relative;
+    width: 8.5in;
+    height: 11in;
+    margin: 0 auto;
+    background: var(--page);
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,.16), 0 10px 30px rgba(0,0,0,.18);
+  }
+  .sheet p { margin: 0; }
+
+  .cover-abs { position: absolute; width: 6.25in; left: 1.25in; text-align: center; }
+  .cover-logo {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: block;
+  }
+  .cover1 .cover-logo { top: 2.9in; width: 1.91in; transform: translateX(calc(-50% + 0.267in)); }
+  .cover1 .t { top: 5.86in; font-weight: 700; font-size: 10pt; }
+  .cover1 .a { top: 7.54in; font-weight: 700; }
+  .cover1 .d { top: 8.84in; font-weight: 700; font-size: 14pt; }
+
+  .cover2 .cover-logo { top: 1.26in; width: 1.92in; transform: translateX(calc(-50% + 0.133in)); }
+  .cover2 .title { top: 3.36in; font-weight: 700; }
+  .cover2 .a1 { top: 3.85in; }
+  .cover2 .a2 { top: 4.27in; }
+  .cover2 .a3 { top: 4.70in; }
+  .cover2 .a4 { top: 5.12in; }
+  .cover2 .a5 { top: 5.54in; }
+  .cover2 .a6 { top: 6.37in; }
+  .cover2 .a7 { top: 6.88in; }
+  .cover2 .a8 { top: 7.76in; font-weight: 700; }
+  .cover2 .a9 { top: 8.48in; }
+
+  .dash {
+    position: absolute;
+    left: 50%;
+    transform: translateX(calc(-50% + 0.12in));
+    width: 4.36in;
+    height: 0;
+    border-top: 2px dashed #000000;
+  }
+  .cover2 .dash1 { top: 3.77in; }
+  .cover2 .dash2 { top: 6.09in; }
+  .cover2 .solid {
+    position: absolute;
+    top: 7.29in;
+    left: 1.25in;
+    width: 6.25in;
+    height: 0;
+    border-top: 1px solid #333333;
+  }
+
+  .frame {
+    position: absolute;
+    left: 1.19in;
+    right: 0.95in;
+    top: 1in;
+    bottom: 0.9in;
+    border: 1px solid var(--rule);
+  }
+  .running-logo {
+    position: absolute;
+    top: 0.19in;
+    right: 0.12in;
+    width: 0.82in;
+    height: auto;
+    display: block;
+    z-index: 2;
+  }
+  .run-head {
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    height: 0.373in;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 2.15in 1fr 0.68in 0.42in;
+    align-items: center;
+    font-weight: 700;
+    font-size: 12pt;
+    line-height: 1;
+  }
+  .rh-school { padding-left: 0.13in; }
+  .rh-institute { text-align: center; }
+  .rh-page { text-align: right; padding-right: 0.08in; }
+  .rh-num {
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-left: 1px solid var(--rule);
+  }
+
+  .body {
+    position: absolute;
+    top: 0.67in;
+    left: 0;
+    right: 0;
+    bottom: 0.06in;
+    padding: 0 0.05in 0 0.06in;
+  }
+  .body p {
+    text-align: justify;
+    text-indent: 0.5in;
+    margin: 0 0 0.13in;
+  }
+  .body p.cont { text-indent: 0; }
+  .body p.caption {
+    text-align: center;
+    text-indent: 0;
+    font-weight: 700;
+    margin: 0.10in 0 0.08in;
+  }
+  h2, h3 { font-size: 12pt; font-weight: 400; margin: 0; line-height: 1.5; }
+  .h-center {
+    text-align: center;
+    font-weight: 700;
+    margin: 0.30in 0 0.10in;
+  }
+  .h-first { margin-top: 0.02in; }
+  .h-indent {
+    text-align: justify;
+    text-indent: 0.5in;
+    font-weight: 400;
+    margin: 0.30in 0 0.08in;
+  }
+  .h-left {
+    text-align: left;
+    font-weight: 700;
+    margin: 0.30in 0 0.08in;
+  }
+  .h-left-first { margin-top: 0.02in; }
+  .h-sub {
+    text-align: left;
+    font-weight: 700;
+    margin: 0.22in 0 0.06in;
+  }
+  .fig {
+    display: block;
+    width: 6.25in;
+    max-width: 100%;
+    height: auto;
+    margin: 0.12in auto 0;
+  }
+  .fig-top { margin-top: 0.04in; }
+  .tbl {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11pt;
+    line-height: 1.28;
+    margin: 0.08in 0 0;
+  }
+  .tbl th, .tbl td {
+    border: 1px solid #000;
+    padding: 0.02in 0.055in;
+    text-align: left;
+    vertical-align: top;
+    font-weight: 400;
+  }
+  .tbl th { font-weight: 400; }
+  .tbl.tests { font-size: 10pt; }
+  .spacer { height: 0.10in; }
+  .print-btn {
+    position: fixed;
+    right: 18px;
+    bottom: 18px;
+    z-index: 50;
+    font-family: "Segoe UI", system-ui, sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 16px;
+    border-radius: 999px;
+    border: 1px solid #8a8a8a;
+    background: #ffffff;
+    color: #111111;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0,0,0,.2);
+  }
+  .print-btn:hover { background: #f2f2f2; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .doc { gap: 0; display: block; }
+    .sheet {
+      box-shadow: none;
+      margin: 0;
+      page-break-after: always;
+      break-after: page;
+    }
+    .sheet:last-child { page-break-after: auto; break-after: auto; }
+    .print-btn { display: none; }
+  }
+  @page { size: 8.5in 11in; margin: 0; }
+</style>
+</head>
+<body>
+
+<div class="doc">
+
+  <section class="sheet cover1" aria-label="Cover page">
+    <img class="cover-logo" src="paper-assets/logo-cover.png" alt="Tangub City Global College seal">
+    <p class="cover-abs t">PHOTO TEXT READER</p>
+    <p class="cover-abs a">Stephen Mark Maluto</p>
+    <p class="cover-abs d">NOVEMBER 2026</p>
+  </section>
+
+  <section class="sheet cover2" aria-label="Title page">
+    <img class="cover-logo" src="paper-assets/logo-cover.png" alt="Tangub City Global College seal">
+    <p class="cover-abs title">Photo Text Reader</p>
+    <div class="dash dash1"></div>
+    <p class="cover-abs a1">A Project Paper</p>
+    <p class="cover-abs a2">Presented to</p>
+    <p class="cover-abs a3">Mr. James Bernard C. Febrio</p>
+    <p class="cover-abs a4">Instructor of the Institute of Computer Studies</p>
+    <p class="cover-abs a5">Tangub City Global College</p>
+    <div class="dash dash2"></div>
+    <p class="cover-abs a6">In Partial Fulfillment of the Course</p>
+    <p class="cover-abs a7">Multimedia Systems</p>
+    <div class="solid"></div>
+    <p class="cover-abs a8">Stephen Mark O. Maluto</p>
+    <p class="cover-abs a9">November 2026</p>
+  </section>
+
+  <section class="sheet content" aria-label="Page 1">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">1</span>
+      </div>
+      <div class="body">
+        <h2 class="h-center h-first">Introduction</h2>
+        <p>Photo Text Reader is a Flutter and Dart web application designed to convert words visible in photographs into editable digital text. Manually retyping text from photographed notes, printed documents, signs, or learning materials can be time-consuming. The application allows users to select an image, recognize the text using optical character recognition (OCR), review or correct the result, and copy or download the extracted text.</p>
+
+        <h2 class="h-center">Project Overview</h2>
+        <p>The submitted project is named phototextreader. Its Flutter interface is implemented in main.dart and home_screen.dart, while OCR operations are separated into service files. The application provides an image upload area, language selection, recognition progress, an editable results field, a word and character count, and actions to copy, download, or clear text.</p>
+        <p>Recognition is performed in the Chrome browser through Tesseract.js 5.1.1, loaded from a content delivery network by web/index.html. Image selection uses the Flutter image_picker package. The browser-based implementation does not send the selected photo to an application server, although internet access is needed to obtain the OCR engine and language data initially.</p>
+
+        <h2 class="h-center">Scope and Limitations</h2>
+        <p>The supplied source supports OCR in Flutter Web. Its non-web service implementation explicitly reports OCR as unsupported; therefore Android and Windows OCR functionality must not be assumed. The source provides 16 selectable OCR languages, a 25 MB image-size limit, and text-file export. Recognition accuracy depends on image quality, language selection, and the OCR engine. No completed runtime test evidence was supplied with the ZIP.</p>
+
+        <h2 class="h-center">How It Works</h2>
+        <p>The user opens the Photo Text Reader interface in Chrome and chooses an image from the gallery or file picker. The application reads the image bytes, checks the 25 MB limit, displays the image preview, and starts extraction. The user may select a recognition language and run extraction again. The browser loads Tesseract.js, processes the image, and sends</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 2">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">2</span>
+      </div>
+      <div class="body">
+        <p class="cont">recognized text and progress updates back to Flutter. The result is displayed in an editable text field, where the user can revise it before copying or saving it as a .txt file.</p>
+
+        <img class="fig fig-top" src="paper-assets/ipo-flow.png" alt="Input, process, and output flow of the Photo Text Reader">
+        <table class="tbl">
+          <thead>
+            <tr><th style="width:33.3%">Input</th><th style="width:33.3%">Process</th><th style="width:33.4%">Output</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Selected photograph</td><td>Read image bytes, validate size, identify image format</td><td>Image preview or validation message</td></tr>
+            <tr><td>OCR language selection</td><td>Pass chosen language code to browser OCR engine</td><td>Language-specific recognition request</td></tr>
+            <tr><td>Extract text command</td><td>Load Tesseract.js and recognize image text with progress feedback</td><td>Recognized text in editable field</td></tr>
+            <tr><td>Edited text and copy command</td><td>Copy current text to system clipboard</td><td>Copied text</td></tr>
+            <tr><td>Edited text and download command</td><td>Create UTF-8 text Blob and browser download</td><td>Downloaded .txt file</td></tr>
+          </tbody>
+        </table>
+        <p class="caption">Figure 1. IPO flow of the Photo Text Reader application.</p>
+
+        <h2 class="h-center">Narrative Flow of Data</h2>
+        <p>The selected image remains in the browser workflow. Flutter reads the file into bytes and converts it to a base64 data URL for the JavaScript OCR function. Tesseract.js returns recognized text to the Dart interface, which displays it for editing. Copying uses the clipboard; downloading creates a browser-side text file. The source does not implement a database or a user account system.</p>
+
+        <h2 class="h-center">System Components</h2>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 3">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">3</span>
+      </div>
+      <div class="body">
+        <table class="tbl">
+          <thead>
+            <tr><th style="width:51.5%">Source file</th><th style="width:48.5%">Role</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>lib/main.dart</td><td>Application entry point and visual theme</td></tr>
+            <tr><td>lib/home_screen.dart</td><td>Image picker, language selector, preview, editable result, progress, and actions</td></tr>
+            <tr><td>lib/services/ocr_service.dart</td><td>Platform-aware OCR service interface and image MIME detection</td></tr>
+            <tr><td>lib/services/ocr_service_web.dart</td><td>Browser JavaScript interoperation for OCR and download</td></tr>
+            <tr><td>lib/services/ocr_service_stub.dart</td><td>Unsupported-platform behavior</td></tr>
+            <tr><td>web/index.html</td><td>Tesseract.js loading, OCR execution, and text-file download</td></tr>
+          </tbody>
+        </table>
+
+        <h2 class="h-center">System Screen Evidence</h2>
+        <p>The uploaded source archive contains code but no verified screenshots of the running application. Insert real screenshots captured from Chrome in the spaces below before submission. Do not use a mockup as proof that a feature worked.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 4">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">4</span>
+      </div>
+      <div class="body">
+        <h2 class="h-indent h-first">Home and Upload Screen</h2>
+        <img class="fig fig-top" src="paper-assets/fig2-home.png" alt="Photo Text Reader home and upload screen">
+        <p class="caption">Figure 2. Photo Text Reader home and photo upload interface.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 5">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">5</span>
+      </div>
+      <div class="body">
+        <h2 class="h-indent h-first">Image Preview and Language Selection</h2>
+        <img class="fig fig-top" src="paper-assets/fig3-preview.png" alt="Selected image and OCR language controls">
+        <p class="caption">Figure 3. Selected image and OCR language controls.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 6">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">6</span>
+      </div>
+      <div class="body">
+        <h2 class="h-left h-left-first">Extracted Text and Editing</h2>
+        <img class="fig fig-top" src="paper-assets/fig4-editing.png" alt="OCR result, editing area, and word count">
+        <p class="caption">Figure 4. OCR result, editing area, and word count.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 7">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">7</span>
+      </div>
+      <div class="body">
+        <h2 class="h-left h-left-first">Text Download or Copy Confirmation</h2>
+        <img class="fig fig-top" src="paper-assets/fig5-download.png" alt="Text export or copy result">
+        <p class="caption">Figure 5. Text export or copy result.</p>
+
+        <h2 class="h-left">Testing</h2>
+        <p>The following tests are based on implemented features and should be carried out using the Chrome target. Because the ZIP contains no recorded execution logs, observed results and Pass/Fail decisions are intentionally left pending.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 8">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">8</span>
+      </div>
+      <div class="body">
+        <table class="tbl tests">
+          <thead>
+            <tr>
+              <th style="width:20.5%">Test</th>
+              <th style="width:20%">What you tried</th>
+              <th style="width:20.3%">Expected result</th>
+              <th style="width:19.6%">Actual result</th>
+              <th style="width:19.6%">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>1</td><td>Select a readable image smaller than 25 MB</td><td>Image preview appears and OCR starts</td><td>To be recorded</td><td>Pending</td></tr>
+            <tr><td>2</td><td>Select English and extract text from a clear printed page</td><td>Recognized text appears in the editor</td><td>To be recorded</td><td>Pending</td></tr>
+            <tr><td>3</td><td>Change the language and run OCR again</td><td>Recognition runs with the selected language</td><td>To be recorded</td><td>Pending</td></tr>
+            <tr><td>4</td><td>Edit the recognized text and use Copy and Download</td><td>Edited text copies and downloads as .txt</td><td>To be recorded</td><td>Pending</td></tr>
+            <tr><td>5 (comparison)</td><td>Time OCR extraction and manual retyping of the same image</td><td>Record duration and compare accuracy and effort</td><td>OCR: ___ min; manual: ___ min</td><td>Pending</td></tr>
+          </tbody>
+        </table>
+        <p class="cont" style="margin-top:0.12in">Test procedure: Record the date, operating system, Chrome version, selected image, selected language, and observed result. For Test 5, use the same source image and compare the corrected final text against the original. Do not claim higher speed or accuracy without actual measurements.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet content" aria-label="Page 9">
+    <img class="running-logo" src="paper-assets/logo.jpg" alt="">
+    <div class="frame">
+      <div class="run-head">
+        <span class="rh-school">Tangub City Global College</span>
+        <span class="rh-institute">Institute of Computer Studies</span>
+        <span class="rh-page">Page</span>
+        <span class="rh-num">9</span>
+      </div>
+      <div class="body">
+        <h2 class="h-left h-left-first">Conclusion</h2>
+        <div class="spacer"></div>
+
+        <h3 class="h-sub">What the Source Implements</h3>
+        <p>The submitted Flutter/Dart project contains a browser-based workflow for selecting a photo, performing Tesseract.js OCR, displaying editable recognized text, showing processing progress, counting words and characters, and copying or downloading text. These are findings from source inspection, not proof of successful execution on a particular computer.</p>
+        <div class="spacer"></div>
+
+        <h3 class="h-sub">Limitations</h3>
+        <p>OCR is explicitly unsupported on non-web platforms in the supplied service stub. Initial OCR engine and language-data loading depends on network access. Image size is limited to 25 MB, and poor-quality images may produce recognition errors. The project does not include documented completed functional tests or a server-side storage system.</p>
+        <div class="spacer"></div>
+
+        <h3 class="h-sub">Recommendations</h3>
+        <p>Recommended improvements include testing with different image qualities and languages, recording recognition accuracy and time, improving user-facing error guidance, and evaluating future offline engine packaging or native-platform OCR support.</p>
+        <div class="spacer"></div>
+
+        <h3 class="h-sub">Submission Checklist</h3>
+        <p>Before submission, insert four genuine application screenshots, execute and record Tests 1–5, and update the conclusion with verified findings. The title page, institutional presentation, main headings, IPO table, screenshot captions, testing table, and conclusion follow the structure of the provided PhotoGrid Paper reference.</p>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<button class="print-btn" type="button" onclick="window.print()">Print / Save as PDF</button>
+
+</body>
+</html>
+

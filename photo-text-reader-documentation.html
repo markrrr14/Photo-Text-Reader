@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Photo Text Reader — System Documentation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    --bg: #f3f7f5;
+    --surface: #ffffff;
+    --surface-2: #e7f0ec;
+    --fg: #16201c;
+    --muted: #55645e;
+    --line: #d3ddd8;
+    --accent: #2e6b57;
+    --accent-soft: #dcebe4;
+    --accent-fg: #ffffff;
+    --danger: #a3372f;
+    --warn: #8a5a12;
+    --warn-soft: #f6ecd8;
+    --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+    --font-body: "Instrument Sans", "Segoe UI", system-ui, sans-serif;
+    --font-mono: "JetBrains Mono", ui-monospace, Menlo, Consolas, monospace;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f1613;
+      --surface: #17211d;
+      --surface-2: #1f2d28;
+      --fg: #e3ebe7;
+      --muted: #9aaaa3;
+      --line: #2a3732;
+      --accent: #7fc4a8;
+      --accent-soft: #22362f;
+      --accent-fg: #0b1f17;
+      --danger: #f0958d;
+      --warn: #e5bd7c;
+      --warn-soft: #332a17;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f1613;
+    --surface: #17211d;
+    --surface-2: #1f2d28;
+    --fg: #e3ebe7;
+    --muted: #9aaaa3;
+    --line: #2a3732;
+    --accent: #7fc4a8;
+    --accent-soft: #22362f;
+    --accent-fg: #0b1f17;
+    --danger: #f0958d;
+    --warn: #e5bd7c;
+    --warn-soft: #332a17;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); }
+  code, kbd, .mono { font-family: var(--font-mono); font-size: 0.88em; }
+  code {
+    background: var(--surface-2);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 0.1em 0.4em;
+    white-space: nowrap;
+  }
+  kbd {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom-width: 2px;
+    border-radius: 6px;
+    padding: 0.1em 0.45em;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
+
+  .hero {
+    border-bottom: 1px solid var(--line);
+    background:
+      radial-gradient(1200px 400px at 15% -10%, var(--accent-soft), transparent 70%),
+      var(--surface);
+  }
+  .hero-inner { padding: 56px 0 40px; }
+  .eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+  .eyebrow::before {
+    content: "";
+    width: 26px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 2px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 5vw, 3.1rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.04;
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+  .lede {
+    font-size: clamp(1rem, 2vw, 1.18rem);
+    color: var(--muted);
+    max-width: 68ch;
+    margin: 0;
+  }
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 26px;
+    margin: 26px 0 0;
+    padding: 0;
+    list-style: none;
+    font-size: 0.9rem;
+  }
+  .meta li { color: var(--muted); }
+  .meta b { display: block; color: var(--fg); font-weight: 600; font-size: 0.95rem; }
+
+  .theme-toggle {
+    position: absolute;
+    top: 18px;
+    right: 20px;
+    min-height: 40px;
+    padding: 0 14px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--fg);
+    font: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .theme-toggle:hover { border-color: var(--accent); }
+  .hero { position: relative; }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 250px minmax(0, 1fr);
+    gap: 48px;
+    padding: 44px 0 80px;
+    align-items: start;
+  }
+  .toc { position: sticky; top: 24px; }
+  .toc h2 {
+    font-family: var(--font-display);
+    font-size: 0.78rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 12px;
+  }
+  .toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; counter-reset: toc; }
+  .toc a {
+    display: block;
+    padding: 7px 12px;
+    border-radius: 8px;
+    border-left: 2px solid transparent;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    line-height: 1.35;
+  }
+  .toc a:hover { background: var(--surface-2); color: var(--fg); }
+  .toc a.active { color: var(--accent); border-left-color: var(--accent); background: var(--accent-soft); font-weight: 600; }
+  .toc .back { margin-top: 18px; font-size: 0.82rem; }
+
+  main { min-width: 0; display: grid; gap: 54px; }
+  section { scroll-margin-top: 24px; }
+  section > h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.35rem, 3vw, 1.75rem);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin: 0 0 6px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  section > h2 .num {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--accent);
+    letter-spacing: 0.05em;
+    flex: none;
+  }
+  .section-sub { color: var(--muted); margin: 0 0 20px; max-width: 70ch; }
+  section p { margin: 0 0 14px; max-width: 75ch; }
+  section h3 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    letter-spacing: -0.01em;
+    margin: 28px 0 8px;
+  }
+  section ul, section ol { margin: 0 0 16px; padding-left: 22px; max-width: 75ch; }
+  section li { margin: 0 0 7px; }
+  section li::marker { color: var(--accent); }
+
+  .callout {
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 10px;
+    background: var(--surface);
+    padding: 16px 18px;
+    margin: 20px 0;
+    max-width: 78ch;
+  }
+  .callout p:last-child { margin: 0; }
+  .callout .tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+  .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+  .callout.warn .tag { color: var(--warn); }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 12px;
+    margin: 22px 0 0;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px;
+  }
+  .metric .v {
+    font-family: var(--font-display);
+    font-size: 1.7rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    color: var(--accent);
+  }
+  .metric .k { font-size: 0.82rem; color: var(--muted); margin-top: 3px; }
+
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    margin: 18px 0 8px;
+  }
+  table { border-collapse: collapse; width: 100%; font-size: 0.9rem; min-width: 560px; }
+  caption {
+    caption-side: bottom;
+    text-align: left;
+    font-size: 0.82rem;
+    color: var(--muted);
+    padding: 8px 12px 0;
+  }
+  th, td { text-align: left; padding: 11px 14px; vertical-align: top; border-bottom: 1px solid var(--line); }
+  thead th {
+    background: var(--surface-2);
+    font-size: 0.76rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--surface-2); }
+  td code { white-space: nowrap; }
+
+  .steps { counter-reset: step; list-style: none; padding: 0; margin: 22px 0 0; display: grid; gap: 12px; }
+  .steps li {
+    counter-increment: step;
+    position: relative;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 16px 14px 58px;
+    margin: 0;
+  }
+  .steps li::before {
+    content: counter(step, decimal-leading-zero);
+    position: absolute;
+    left: 16px;
+    top: 14px;
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 500;
+    color: var(--accent);
+  }
+  .steps b { display: block; margin-bottom: 2px; }
+  .steps span { color: var(--muted); font-size: 0.92rem; }
+
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin: 22px 0 0; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+  }
+  .card h3 { margin: 0 0 6px; font-size: 1rem; }
+  .card p { margin: 0; color: var(--muted); font-size: 0.92rem; }
+  .card .kicker {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .filemap {
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 18px;
+    margin: 18px 0;
+    overflow-x: auto;
+    white-space: pre;
+    line-height: 1.75;
+    color: var(--muted);
+  }
+  .filemap b { color: var(--fg); font-weight: 500; }
+
+  .status-pill {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    color: var(--muted);
+    background: var(--surface-2);
+    white-space: nowrap;
+  }
+  .status-pill.pending { color: var(--warn); border-color: var(--warn); background: var(--warn-soft); }
+
+  .divider { height: 1px; background: var(--line); border: 0; margin: 0; }
+
+  footer.site {
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+  }
+  footer.site .wrap { padding: 26px 20px 40px; }
+  footer.site p { margin: 0 0 6px; color: var(--muted); font-size: 0.88rem; }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 24px; padding-top: 24px; }
+    .toc {
+      position: static;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: var(--surface);
+      padding: 14px 16px;
+    }
+    .toc ol { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 4px; }
+    .toc li { flex: none; }
+    .toc a { white-space: nowrap; border-left: 0; border: 1px solid var(--line); border-radius: 999px; }
+    .toc a.active { border-color: var(--accent); }
+    .toc .back { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    * { transition: none !important; }
+  }
+  @media print {
+    :root { --bg: #fff; --surface: #fff; --surface-2: #f3f3f3; --fg: #000; --muted: #444; --line: #bbb; --accent: #1f4d3d; }
+    .theme-toggle, .toc { display: none; }
+    .layout { display: block; padding: 20px 0; }
+    .hero-inner { padding: 20px 0; }
+    section { break-inside: avoid-page; }
+    a { color: inherit; text-decoration: underline; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle color theme">Theme</button>
+  <div class="wrap hero-inner">
+    <p class="eyebrow">System Documentation</p>
+    <h1>Photo Text Reader</h1>
+    <p class="lede">A browser-based system that turns words visible in photographs and PDF pages into editable, searchable, translatable digital text using optical character recognition.</p>
+    <ul class="meta">
+      <li><b>Stephen Mark O. Maluto</b>Author</li>
+      <li><b>Multimedia Systems</b>Course</li>
+      <li><b>Mr. James Bernard C. Febrio</b>Instructor</li>
+      <li><b>Tangub City Global College</b>Institute of Computer Studies</li>
+      <li><b>November 2026</b>Project Paper</li>
+    </ul>
+  </div>
+</header>
+
+<div class="wrap layout">
+  <aside class="toc" aria-label="Table of contents">
+    <h2>Contents</h2>
+    <ol>
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#glance">System at a glance</a></li>
+      <li><a href="#architecture">Architecture</a></li>
+      <li><a href="#workflow">How it works</a></li>
+      <li><a href="#ipo">Input, process, output</a></li>
+      <li><a href="#dataflow">Data flow</a></li>
+      <li><a href="#features">Feature reference</a></li>
+      <li><a href="#stack">Technology stack</a></li>
+      <li><a href="#limits">Scope and limitations</a></li>
+      <li><a href="#testing">Testing plan</a></li>
+      <li><a href="#conclusion">Conclusion</a></li>
+      <li><a href="#alignment">Paper vs. implementation</a></li>
+    </ol>
+    <p class="back"><a href="phototextreader.html">Open the application</a></p>
+  </aside>
+
+  <main>
+
+    <section id="overview">
+      <h2><span class="num">01</span>Overview</h2>
+      <p class="section-sub">What the system is for, and what it actually does.</p>
+      <p>Photo Text Reader converts words visible in photographs into editable digital text. Manually retyping text from photographed notes, printed documents, signs, or learning materials is slow and error-prone. The application lets a user add an image, recognize the text with optical character recognition, review or correct the result, and then copy or export the extracted text.</p>
+      <p>The documented system is delivered as a single browser application. Its interface, input handling, OCR orchestration, editing, translation, and document export all run in the browser. Recognition is performed with Tesseract.js; there is no application server, database, or user account system. Internet access is required to obtain the OCR engine and language data the first time, and for machine translation.</p>
+      <div class="callout">
+        <span class="tag">Documentation basis</span>
+        <p>This page combines the project paper <em>Photo Text Reader</em> with source inspection of the shipped application file, <code>phototextreader.html</code>. Where the paper and the shipped edition differ, both are reported in <a href="#alignment">Paper vs. implementation</a> rather than silently reconciled.</p>
+      </div>
+      <div class="callout warn">
+        <span class="tag">Evidence status</span>
+        <p>The supplied material contains source code but no verified screenshots or recorded execution logs. No screenshots are reproduced here, and test results remain pending until they are actually observed in Chrome. A mockup is not evidence that a feature worked.</p>
+      </div>
+    </section>
+
+    <section id="glance">
+      <h2><span class="num">02</span>System at a glance</h2>
+      <p class="section-sub">Key figures taken directly from the shipped source.</p>
+      <div class="metrics">
+        <div class="metric"><div class="v">19</div><div class="k">Selectable OCR languages</div></div>
+        <div class="metric"><div class="v">20</div><div class="k">Pages per batch</div></div>
+        <div class="metric"><div class="v">10</div><div class="k">PDF pages per file</div></div>
+        <div class="metric"><div class="v">1800px</div><div class="k">Image downscale cap</div></div>
+        <div class="metric"><div class="v">0</div><div class="k">Application servers</div></div>
+        <div class="metric"><div class="v">1</div><div class="k">Self-contained HTML file</div></div>
+      </div>
+      <p style="margin-top:18px">Each added image becomes one page with its own result card. Pages are processed sequentially so that progress, stopping, and re-reading stay predictable. PDF files are expanded into page images, with only the first 10 pages of each file added.</p>
+    </section>
+
+    <section id="architecture">
+      <h2><span class="num">03</span>Architecture</h2>
+      <p class="section-sub">One document, several cooperating runtime components.</p>
+      <p>The shipped edition is a single HTML file containing markup, styles, and an inline script. That script is organized into functional areas rather than separate modules, but the responsibilities map cleanly to the components described in the project paper.</p>
+      <div class="filemap"><b>phototextreader.html</b>
+├── markup      language picker, target picker, drop zone, page strip, results, actions
+├── styles      responsive layout, light and dark themes
+└── script
+    ├── input        file picker, camera capture, drag and drop
+    ├── preparation  image re-encode, PDF rasterization, object URLs
+    ├── ocr          Tesseract worker pool, preprocessing, scoring
+    ├── results      per-page editor, word count, copy
+    ├── translation  chunking, translation requests, per-page output
+    ├── export       client-side DOCX writer
+    └── state        page list, progress, stop and restart control</div>
+      <div class="table-wrap">
+        <table>
+          <caption>Component responsibilities. Paper equivalents are noted where the reference document names separate Flutter source files.</caption>
+          <thead>
+            <tr><th>Component</th><th>Paper equivalent</th><th>Role</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Application shell</td><td><code>lib/main.dart</code></td><td>Page structure, theme variables, typography, and responsive layout.</td></tr>
+            <tr><td>Input and workspace</td><td><code>lib/home_screen.dart</code></td><td>File picker, camera capture, drop zone, page thumbnails, language controls, status messages.</td></tr>
+            <tr><td>OCR orchestration</td><td><code>lib/services/ocr_service.dart</code></td><td>Worker caching, preprocessing, variant trials, best-result selection, progress reporting.</td></tr>
+            <tr><td>Browser interoperation</td><td><code>lib/services/ocr_service_web.dart</code><br><code>web/index.html</code></td><td>Tesseract.js loading, image conversion, clipboard and download actions.</td></tr>
+            <tr><td>Unsupported-platform path</td><td><code>lib/services/ocr_service_stub.dart</code></td><td>In the paper's Flutter build, non-web targets explicitly report OCR as unsupported.</td></tr>
+            <tr><td>Translation</td><td>Not described in the paper</td><td>Optional machine translation of extracted text using a remote service.</td></tr>
+            <tr><td>DOCX export</td><td>Text-file export in the paper</td><td>Client-side ZIP archive containing minimal WordprocessingML.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="workflow">
+      <h2><span class="num">04</span>How it works</h2>
+      <p class="section-sub">The operator's path through the application, from photo to finished text.</p>
+      <ol class="steps">
+        <li><b>Open the application and choose languages</b><span>The OCR language describes the text in the photos. A translation target is optional. Both choices are remembered in browser storage.</span></li>
+        <li><b>Add photos or files</b><span>Use the file picker, the camera capture input, or drag and drop. Images and PDFs can be mixed in one batch, up to 20 pages.</span></li>
+        <li><b>Prepare the pages</b><span>Images are redrawn onto a canvas and re-encoded as JPEG bounded to 1800 pixels on the longest side. PDFs are rasterized at 2× scale, limited to the first 10 pages per file.</span></li>
+        <li><b>Recognize text</b><span>Each page is processed in order. The OCR path converts the image to grayscale, applies an automatic threshold, and trials up to three variants, keeping the best-scoring result. Progress and per-page state are shown.</span></li>
+        <li><b>Review and edit</b><span>Recognized text appears in a per-page editable field, with a running word count. Lines that fail a minimum character test are discarded during cleanup.</span></li>
+        <li><b>Translate if needed</b><span>When a target language is selected, each non-empty page is translated in chunks and shown beneath its extracted text.</span></li>
+        <li><b>Copy or export</b><span>Copy a single page, copy all pages, or download a <code>.docx</code> file containing every page and its translation.</span></li>
+      </ol>
+      <p style="margin-top:16px">Changing the OCR language marks all pages for re-reading. The read action doubles as a stop control while processing is running.</p>
+    </section>
+
+    <section id="ipo">
+      <h2><span class="num">05</span>Input, process, output</h2>
+      <p class="section-sub">The paper's IPO flow, with behavior verified against the shipped source.</p>
+      <div class="table-wrap">
+        <table>
+          <caption>Figure 1. IPO flow of the Photo Text Reader application.</caption>
+          <thead>
+            <tr><th>Input</th><th>Process</th><th>Output</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Selected photograph or PDF</td><td>Read the file, re-encode images to JPEG, rasterize PDF pages, validate type</td><td>Page thumbnails and preview in the workspace</td></tr>
+            <tr><td>OCR language selection</td><td>Map the label to a Tesseract language code and load the matching worker</td><td>Language-specific recognition request</td></tr>
+            <tr><td>Extract text command</td><td>Preprocess the image into variants and run Tesseract.js with progress feedback</td><td>Recognized text in a per-page editable field</td></tr>
+            <tr><td>Edited text and copy command</td><td>Write the current text to the system clipboard, with a selection fallback</td><td>Copied text</td></tr>
+            <tr><td>Translation target and command</td><td>Split text into chunks and request a translation for each page</td><td>Translated text beneath each result</td></tr>
+            <tr><td>Export command</td><td>Build a ZIP package containing WordprocessingML and trigger a browser download</td><td>Downloaded <code>.docx</code> file</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>The paper describes a 25 MB image-size check and <code>.txt</code> export. The shipped HTML edition does not enforce a fixed megabyte limit; it bounds image dimensions during re-encoding and limits page counts instead. It exports <code>.docx</code>, not <code>.txt</code>.</p>
+    </section>
+
+    <section id="dataflow">
+      <h2><span class="num">06</span>Data flow</h2>
+      <p class="section-sub">Where the data goes, and where it does not.</p>
+      <p>The selected image remains in the browser workflow. Flutter reads the file into bytes and converts it to a data URL for the JavaScript OCR function in the paper's build; in the shipped HTML edition, the file is read into a blob URL for preview and drawn to a canvas for recognition. Recognized text is returned to the interface and displayed for editing.</p>
+      <p>Copying uses the clipboard API with a fallback that selects the text. Downloading creates the document entirely in the browser and saves it locally. Language preferences are stored in <code>localStorage</code>. No database, account, or server-side storage is implemented, and the selected photo is not sent to an application server.</p>
+      <div class="grid-2">
+        <div class="card"><div class="kicker">Stays local</div><h3>Photos and results</h3><p>Page images, object URLs, extracted text, edits, and generated documents remain in the browser session.</p></div>
+        <div class="card"><div class="kicker">Network</div><h3>Engine and translation</h3><p>Tesseract.js and its language data are fetched from a CDN. Translation requests go to a remote service. PDF support is also loaded from a CDN.</p></div>
+      </div>
+    </section>
+
+    <section id="features">
+      <h2><span class="num">07</span>Feature reference</h2>
+      <p class="section-sub">What each visible control does, and its practical boundary.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Feature</th><th>Behavior</th><th>Boundary</th></tr></thead>
+          <tbody>
+            <tr><td>Photo input</td><td>File picker, camera capture, and drag and drop. Images are re-encoded to JPEG quality 0.88.</td><td>Longest side capped at 1800 px during preparation.</td></tr>
+            <tr><td>PDF input</td><td>Pages are rendered at 2× scale, then prepared like photos.</td><td>First 10 pages per file; the remainder are skipped with a notice.</td></tr>
+            <tr><td>Batch size</td><td>Pages collect in a thumbnail strip with per-page remove controls.</td><td>20 pages per batch.</td></tr>
+            <tr><td>OCR engine</td><td>Tesseract.js 5.1.1 with page segmentation mode 11 and preserved inter-word spacing.</td><td>Initial engine and language data require a network connection.</td></tr>
+            <tr><td>Preprocessing</td><td>Grayscale conversion, automatic threshold, and three variants: grayscale, black on white, white on black. The best alphanumeric score wins.</td><td>Small or blurry text can still be misread.</td></tr>
+            <tr><td>OCR languages</td><td>19 selectable languages including English, Filipino, Cebuano, Chinese, Japanese, Korean, Arabic, and Russian.</td><td>Paper lists 16; see the alignment table.</td></tr>
+            <tr><td>Progress and stop</td><td>Per-page status and percentage; the read control becomes a stop control during processing.</td><td>Stopping pauses the batch; the remaining pages stay queued.</td></tr>
+            <tr><td>Editing and counts</td><td>Each page has its own editable field and contributes to a live word count.</td><td>Edits stay in the current session unless exported.</td></tr>
+            <tr><td>Copy</td><td>Per-page copy and copy-all, using the clipboard API with a manual fallback.</td><td>Browser clipboard permissions can require a user gesture.</td></tr>
+            <tr><td>Translation</td><td>Optional target language, 19 choices, chunked at 1200 characters per request.</td><td>Needs internet access; depends on a third-party service.</td></tr>
+            <tr><td>Document export</td><td>Downloads a <code>.docx</code> named with the date, containing each page and its translation.</td><td>Archive entries are stored without compression, so files are larger.</td></tr>
+            <tr><td>Preferences</td><td>OCR language and translation target persist between sessions.</td><td>Stored per browser profile via <code>localStorage</code>.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="stack">
+      <h2><span class="num">08</span>Technology stack</h2>
+      <p class="section-sub">Libraries and browser capabilities the system depends on.</p>
+      <div class="grid-2">
+        <div class="card"><div class="kicker">Recognition</div><h3>Tesseract.js 5.1.1</h3><p>Loaded from cdnjs. Workers are cached per language. When the page runs inside a hosted reader environment, that reader is used instead of local OCR.</p></div>
+        <div class="card"><div class="kicker">PDF</div><h3>pdf.js 3.11.174</h3><p>Loaded from cdnjs with a matching worker. Renders each page to a canvas for recognition.</p></div>
+        <div class="card"><div class="kicker">Image processing</div><h3>Canvas 2D</h3><p>Resizing, JPEG encoding, grayscale conversion, Otsu thresholding, and variant generation.</p></div>
+        <div class="card"><div class="kicker">Translation</div><h3>Remote translation endpoint</h3><p>Source language is detected automatically. Text is split at 1200 characters and reassembled.</p></div>
+        <div class="card"><div class="kicker">Export</div><h3>Custom ZIP and OOXML writer</h3><p>A small CRC-32 and ZIP store implementation assembles the DOCX package without any external archive library.</p></div>
+        <div class="card"><div class="kicker">Platform</div><h3>Modern web browser</h3><p>No build step and no backend. Chrome is the target used in the paper's testing plan.</p></div>
+      </div>
+    </section>
+
+    <section id="limits">
+      <h2><span class="num">09</span>Scope and limitations</h2>
+      <p class="section-sub">Boundaries that affect what may be claimed about the system.</p>
+      <ul>
+        <li><b>Web-only in practice.</b> The paper's Flutter service stub explicitly reports OCR as unsupported on non-web platforms. Android and Windows OCR must not be assumed.</li>
+        <li><b>Network dependency.</b> The OCR engine and language data are fetched from a CDN, PDF support is fetched from a CDN, and translation requires a remote service. There is no offline engine packaging.</li>
+        <li><b>Accuracy is conditional.</b> Recognition quality depends on image sharpness, lighting, contrast, language selection, and page layout. Preprocessing improves the odds but cannot guarantee correctness.</li>
+        <li><b>Bounded batches.</b> At most 20 pages per batch and 10 PDF pages per file. Images are downscaled to 1800 px, which can lose very small text.</li>
+        <li><b>No persistence layer.</b> No database, accounts, or server storage. Refreshing the page discards the working set; only language preferences survive.</li>
+        <li><b>Third-party translation.</b> The translation feature depends on an external endpoint that may change, rate-limit, or become unavailable.</li>
+        <li><b>Evidence gap.</b> No completed runtime tests, screenshots, or measurement logs were supplied. Performance and accuracy claims require measurement.</li>
+      </ul>
+      <div class="callout">
+        <span class="tag">Do not overclaim</span>
+        <p>The system can be described as implementing a browser OCR workflow. It cannot yet be described as proven faster or more accurate than manual retyping until Test 5 in the testing plan is actually carried out and recorded.</p>
+      </div>
+    </section>
+
+    <section id="testing">
+      <h2><span class="num">10</span>Testing plan</h2>
+      <p class="section-sub">Tests derived from implemented features. Results stay pending until observed in Chrome.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>#</th><th>What you tried</th><th>Expected result</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Add a readable image</td><td>Thumbnail and preview appear; OCR starts</td><td><span class="status-pill pending">Pending</span></td></tr>
+            <tr><td>2</td><td>Select English and extract text from a clear printed page</td><td>Recognized text appears in the editor</td><td><span class="status-pill pending">Pending</span></td></tr>
+            <tr><td>3</td><td>Change the language and run OCR again</td><td>Recognition runs with the selected language</td><td><span class="status-pill pending">Pending</span></td></tr>
+            <tr><td>4</td><td>Edit the recognized text and use Copy and Download</td><td>Edited text copies and downloads as a document</td><td><span class="status-pill pending">Pending</span></td></tr>
+            <tr><td>5</td><td>Time OCR extraction against manual retyping of the same image</td><td>Record duration, accuracy, and effort for both methods</td><td><span class="status-pill pending">Pending</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <h3>Procedure</h3>
+      <p>Record the date, operating system, browser version, selected image, selected language, and observed result for every test. For Test 5, use the same source image for both methods and compare the corrected final text against the original. Do not claim higher speed or accuracy without actual measurements.</p>
+      <h3>Submission checklist</h3>
+      <ul>
+        <li>Insert genuine screenshots captured from the running application, not mockups.</li>
+        <li>Execute and record Tests 1 through 5 with observed outcomes.</li>
+        <li>Update the conclusion with verified findings once results exist.</li>
+      </ul>
+    </section>
+
+    <section id="conclusion">
+      <h2><span class="num">11</span>Conclusion</h2>
+      <p class="section-sub">What the source implements, and what should come next.</p>
+      <h3>What the source implements</h3>
+      <p>The project contains a browser-based workflow for adding photos and PDFs, performing Tesseract.js OCR with image preprocessing, displaying editable recognized text per page, showing processing progress and counts, translating results optionally, and copying or exporting text as a DOCX file. These are findings from source inspection, not proof of successful execution on a particular computer.</p>
+      <h3>Limitations</h3>
+      <p>OCR is explicitly unsupported on non-web platforms in the paper's service stub. Initial engine and language-data loading depends on network access. Batches and PDF page counts are bounded, image dimensions are capped, and poor-quality images may produce recognition errors. The project includes no documented completed functional tests and no server-side storage.</p>
+      <h3>Recommendations</h3>
+      <ul>
+        <li>Test with a range of image qualities, scripts, and page layouts, and record recognition accuracy.</li>
+        <li>Measure OCR time against manual retyping on identical source material.</li>
+        <li>Improve user-facing error guidance for network failures, unreadable pages, and clipped PDFs.</li>
+        <li>Evaluate offline engine packaging so the reader works without a CDN.</li>
+        <li>Consider native-platform OCR only if support outside the browser is a real requirement.</li>
+      </ul>
+    </section>
+
+    <section id="alignment">
+      <h2><span class="num">12</span>Paper vs. implementation</h2>
+      <p class="section-sub">The reference document and the shipped HTML edition describe related but not identical systems.</p>
+      <p>The project paper documents a Flutter and Dart web application. The file supplied alongside it, <code>phototextreader.html</code>, is a standalone browser edition with additional input, translation, and export features. The documentation above follows the shipped source for behavior, and preserves the paper's framing for scope, testing, and conclusions.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Area</th><th>Project paper</th><th>Shipped HTML edition</th></tr></thead>
+          <tbody>
+            <tr><td>Platform</td><td>Flutter and Dart, Chrome target</td><td>Single HTML, CSS, and JavaScript file</td></tr>
+            <tr><td>Source layout</td><td><code>main.dart</code>, <code>home_screen.dart</code>, service files</td><td>One inline script with functional areas</td></tr>
+            <tr><td>OCR engine</td><td>Tesseract.js 5.1.1 loaded by <code>web/index.html</code></td><td>Tesseract.js 5.1.1 loaded from cdnjs, with an optional hosted reader</td></tr>
+            <tr><td>OCR languages</td><td>16 selectable</td><td>19 selectable</td></tr>
+            <tr><td>Input</td><td>Single image, 25 MB limit</td><td>Multiple images and PDFs, 20 pages, 10 PDF pages per file, no fixed MB check</td></tr>
+            <tr><td>Preprocessing</td><td>Not specified</td><td>1800 px cap, grayscale, Otsu threshold, three variants</td></tr>
+            <tr><td>Output</td><td>Copy or <code>.txt</code> download</td><td>Copy or <code>.docx</code> download</td></tr>
+            <tr><td>Translation</td><td>Not described</td><td>Optional machine translation into 19 languages</td></tr>
+            <tr><td>PDF support</td><td>Not described</td><td>Rasterized with pdf.js, first 10 pages</td></tr>
+            <tr><td>Persistence</td><td>None</td><td>Language preferences in <code>localStorage</code></td></tr>
+            <tr><td>Evidence</td><td>No runtime tests supplied</td><td>No runtime tests supplied; source inspection only</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<footer class="site">
+  <div class="wrap">
+    <p><b>Photo Text Reader</b> — System Documentation</p>
+    <p>Prepared from the project paper <em>Photo Text Reader</em> by Stephen Mark O. Maluto and from source inspection of <code>phototextreader.html</code>. Tangub City Global College, Institute of Computer Studies, November 2026.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var toggle = document.getElementById("themeToggle");
+  var stored = null;
+  try { stored = localStorage.getItem("ptr-docs-theme"); } catch (e) {}
+  if (stored === "dark" || stored === "light") root.setAttribute("data-theme", stored);
+  function currentTheme() {
+    var set = root.getAttribute("data-theme");
+    if (set) return set;
+    return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  toggle.addEventListener("click", function () {
+    var next = currentTheme() === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("ptr-docs-theme", next); } catch (e) {}
+  });
+
+  var links = Array.prototype.slice.call(document.querySelectorAll(".toc a[href^='#']"));
+  var sections = links.map(function (a) { return document.querySelector(a.getAttribute("href")); }).filter(Boolean);
+  function setActive(id) {
+    links.forEach(function (a) {
+      a.classList.toggle("active", a.getAttribute("href") === "#" + id);
+    });
+  }
+  if ("IntersectionObserver" in window) {
+    var observer = new IntersectionObserver(function (entries) {
+      var visible = entries.filter(function (en) { return en.isIntersecting; });
+      if (!visible.length) return;
+      visible.sort(function (a, b) { return a.boundingClientRect.top - b.boundingClientRect.top; });
+      setActive(visible[0].target.id);
+    }, { rootMargin: "-10% 0px -70% 0px", threshold: 0 });
+    sections.forEach(function (s) { observer.observe(s); });
+  }
+})();
+</script>
+
+</body>
+</html>
